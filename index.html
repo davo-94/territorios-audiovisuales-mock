@@ -459,6 +459,7 @@ function buildComunaCells(w,h,pad){
   });
 }
 function polyPath(poly){ if(!poly) return ''; return 'M'+poly.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join('L')+'Z'; }
+function polyArea(poly){ let a=0; for(let i=0;i<poly.length;i++){ const [x0,y0]=poly[i], [x1,y1]=poly[(i+1)%poly.length]; a+=x0*y1-x1*y0; } return Math.abs(a)/2; }
 
 // mezcla color de capa con superficie según intensidad 0..1
 function shade(capaKey, t){
@@ -528,10 +529,20 @@ function svgMap(w,h,rel,sel,withLegend){
   const domCapa={};
   cells.forEach(c=>{const rs=rel.filter(r=>r.comuna===c.name); if(rs.length){domCapa[c.name]=rs[0].capa;}});
   let s=`<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid meet">`;
+  // 1) rellenos primero, para que ninguna comuna vecina pinte encima de una etiqueta
   cells.forEach(c=>{
     const n=counts[c.name]||0; const t=n/maxc;
     const fill = n? shade(domCapa[c.name], t) : getComputedStyle(root).getPropertyValue('--surface-2').trim();
     s+=`<path class="comuna" d="${polyPath(c.poly)}" fill="${fill}"/>`;
+  });
+  // 2) etiquetas encima, más grandes primero, saltando las que chocarían con una ya puesta
+  const CHAR_W=5.3, LABEL_H=11;
+  const placed=[];
+  [...cells].sort((a,b)=>polyArea(b.poly)-polyArea(a.poly)).forEach(c=>{
+    const hw=c.name.length*CHAR_W/2, hh=LABEL_H/2;
+    const box={x0:c.cx-hw,x1:c.cx+hw,y0:c.cy-hh,y1:c.cy+hh};
+    if(placed.some(p=>box.x0<p.x1&&box.x1>p.x0&&box.y0<p.y1&&box.y1>p.y0)) return;
+    placed.push(box);
     s+=`<text class="comuna-label" x="${c.cx}" y="${c.cy}" text-anchor="middle" dy="3">${c.name}</text>`;
   });
   // puntos
