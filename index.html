@@ -130,6 +130,10 @@ nav.main button.on{color:var(--ink);background:var(--surface-2);box-shadow:inset
 .detail .coords{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
 .detail .txt{font-size:15.5px;line-height:1.62;color:var(--ink)}
 .embed{margin-top:14px;border:1px solid var(--line);border-radius:11px;padding:12px 14px;display:flex;align-items:center;gap:12px;background:var(--surface-2)}
+.embed-frame{margin-top:14px}
+.embed-frame.yt{border:1px solid var(--line);border-radius:11px;overflow:hidden;aspect-ratio:16/9}
+.embed-frame.yt iframe{width:100%;height:100%;border:0;display:block}
+.embed-frame.sp iframe{width:100%;border:0;display:block}
 .embed .play{width:40px;height:40px;flex:none;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:15px}
 .embed b{font-family:var(--f-disp);font-size:13.5px;display:block}
 .embed span{font-family:var(--f-mono);font-size:10.5px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
@@ -383,6 +387,15 @@ function embedIcon(embed){
   if(embed==='Spotify') return `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M6 15.2c4-1.4 8-1.4 12 .2"/><path d="M5 11.6c5-1.9 9-1.9 14 .1"/><path d="M4.2 7.9c6-2.3 9.6-2.3 15.6.1"/></svg>`;
   return '▶';
 }
+function embedMarkup(r){
+  if(r.embed==='YouTube' && r.url){
+    return `<div class="embed-frame yt"><iframe src="https://www.youtube.com/embed/${r.url}" title="${r.t}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+  }
+  if(r.embed==='Spotify' && r.url){
+    return `<div class="embed-frame sp"><iframe style="border-radius:12px" src="https://open.spotify.com/embed/episode/${r.url}" width="100%" height="352" frameborder="0" allowfullscreen allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" loading="lazy"></iframe></div>`;
+  }
+  return `<div class="embed"><div class="play">${embedIcon(r.embed)}</div><div><b>${r.embed==='Documento'?'Documento adjunto':'Reproducir · '+r.embed}</b><span>${r.embed==='Documento'?'PDF enlazado':'contenido embebido'}</span></div></div>`;
+}
 
 // comunas de muestra (subset RM) — nombre + semilla aproximada (x,y en 0..1) para el mapa generado
 const COMUNAS = [
@@ -397,22 +410,22 @@ const RELATOS = [
    x:.35,y:.45, ix:.30,iy:.42, embed:"SoundCloud", rel:[4],
    txt:"Un grupo de vecinas y vecinos levanta una radio de baja potencia para cubrir las juntas de vecinos y la vida del barrio. La antena, instalada en una azotea de la calle Mapocho, alcanzaba diez cuadras a la redonda."},
   {id:2, t:"Cine-club del sindicato", capa:"rec", year:1971, comuna:"Santiago",
-   x:.5,y:.53, ix:.55,iy:.66, embed:"YouTube", rel:[],
+   x:.5,y:.53, ix:.55,iy:.66, embed:"YouTube", url:"_KS2o-W1KqI", rel:[],
    txt:"Todos los viernes se proyectaba cine en el galpón del sindicato. Sábanas por telón y una Bell & Howell prestada. La memoria de esas funciones sobrevive en los relatos de quienes hoy peinan canas."},
   {id:3, t:"Doña Ester, locutora popular", capa:"tra", year:1985, comuna:"Independencia",
-   x:.5,y:.33, ix:.68,iy:.30, embed:"Spotify", rel:[1],
+   x:.5,y:.33, ix:.68,iy:.30, embed:"Spotify", url:"3iBgOQkOSvz792H939qWur", rel:[1],
    txt:"Su voz cruzó tres décadas de radio comunitaria. Empezó leyendo avisos fúnebres y terminó dirigiendo el noticiero barrial más escuchado del sector norte."},
   {id:4, t:"Red de prensa poblacional", capa:"ini", year:1987, comuna:"Renca",
    x:.34,y:.25, ix:.20,iy:.24, embed:"Documento", rel:[1,3],
    txt:"Cientos de boletines mimeografiados circulando de mano en mano durante la dictadura. Un tejido de talleres que sostuvo la palabra propia cuando los medios grandes callaban."},
   {id:5, t:"El cine llegaba en camión", capa:"rec", year:1968, comuna:"Maipú",
-   x:.23,y:.72, ix:.40,iy:.72, embed:"YouTube", rel:[],
+   x:.23,y:.72, ix:.40,iy:.72, embed:"YouTube", url:"4ywd2zo4DZ8", rel:[],
    txt:"Antes de las salas fijas, una unidad móvil recorría los fundos y poblaciones con un proyector. La llegada del camión era fiesta: se acomodaban sillas y cajones en la cancha."},
   {id:6, t:"Nicanor, radiocontrolador de barrio", capa:"tra", year:2004, comuna:"Ñuñoa",
-   x:.7,y:.6, ix:.82,iy:.5, embed:"Spotify", rel:[],
+   x:.7,y:.6, ix:.82,iy:.5, embed:"Spotify", url:"3iBgOQkOSvz792H939qWur", rel:[],
    txt:"De la radioafición a la organización vecinal. Coordinó las primeras transmisiones en vivo de las fiestas costumbristas del sector oriente."},
   {id:7, t:"Estudio abierto en la plaza", capa:"ini", year:2024, comuna:"Estación Central",
-   x:.4,y:.6, ix:.50,iy:.55, embed:"YouTube", rel:[6],
+   x:.4,y:.6, ix:.50,iy:.55, embed:"YouTube", url:"14LPSy__GBY", rel:[6],
    txt:"Hoy la radio vuelve al espacio público: un estudio desmontable que se instala en ferias y plazas para grabar a quien quiera contar su historia."}
 ];
 
@@ -510,7 +523,7 @@ function renderDetail(){
     <h3>${r.t}</h3>
     <div class="meta"><span class="coords">${r.comuna} · ${r.year}</span></div>
     <p class="txt">${r.txt}</p>
-    <div class="embed"><div class="play">${embedIcon(r.embed)}</div><div><b>${r.embed==='Documento'?'Documento adjunto':'Reproducir · '+r.embed}</b><span>${r.embed==='Documento'?'PDF enlazado':'contenido embebido'}</span></div></div>
+    ${embedMarkup(r)}
     ${rels.length?`<div class="related"><div class="lbl">Trenzado con</div>${rels.map(x=>`<button data-jump="${x.id}"><span class="b" style="background:${capaColor(x.capa)}"></span>${x.t}</button>`).join('')}</div>`:''}
   `;
   d.querySelectorAll('[data-jump]').forEach(b=>b.addEventListener('click',()=>{selectedId=+b.dataset.jump;renderExplore();}));
@@ -606,7 +619,15 @@ function svgImage(w,h,rel,sel){
 /* ============================================================
    PLAYGROUND / EDITOR
    ============================================================ */
-let draft = { capa:"ini", placeX:null, placeY:null, points:[] };
+const DRAFT_KEY = 'ta_playground_points';
+function loadDraftPoints(){
+  try{ const raw=localStorage.getItem(DRAFT_KEY); if(raw) return JSON.parse(raw); }catch(e){}
+  return [];
+}
+function saveDraftPoints(){
+  try{ localStorage.setItem(DRAFT_KEY, JSON.stringify(draft.points)); }catch(e){}
+}
+let draft = { capa:"ini", placeX:null, placeY:null, points: loadDraftPoints() };
 let editorFormat="mapa";
 
 // llenar select de comunas
@@ -634,6 +655,7 @@ document.getElementById('addPoint').addEventListener('click',()=>{
   const py = draft.placeY!=null?draft.placeY:(cData?cData[2]:.5);
   draft.points.push({id:Date.now(), t:title, capa:draft.capa, year, comuna, txt, embed, x:px,y:py, ix:px, iy:py, rel:[]});
   draft.placeX=draft.placeY=null;
+  saveDraftPoints();
   document.getElementById('f-title').value=''; document.getElementById('f-text').value=''; document.getElementById('f-embed').value='';
   document.getElementById('canvasName').textContent = draft.points.length+" punto"+(draft.points.length>1?"s":"")+" en el corpus";
   renderPList(); renderEditor();
@@ -704,6 +726,7 @@ function stub(){
 
 /* init */
 stub(); renderPList();
+if(draft.points.length) document.getElementById('canvasName').textContent = draft.points.length+" punto"+(draft.points.length>1?"s":"")+" en el corpus";
 window.__d3ready=function(){ try{ drawHero(); if(document.getElementById('s-explorar').classList.contains('on')) renderExplore(); if(document.getElementById('s-playground').classList.contains('on')) renderEditor(); }catch(e){} };
 if(!window.d3){ let tries=0; const iv=setInterval(()=>{ if(window.d3||tries++>25){clearInterval(iv); if(window.d3) window.__d3ready();} },150); }
 window.addEventListener('load',()=>{drawHero();});
