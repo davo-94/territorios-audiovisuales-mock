@@ -1,6 +1,6 @@
+<meta charset="UTF-8">
 <title>Territorios Audiovisuales</title>
 <meta name="description" content="Prototipo de plataforma: un mismo relato, tres formas de cartografiar el territorio.">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/d3-delaunay/6.0.4/d3-delaunay.min.js" onerror="(function(){var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/d3-delaunay@6.0.4/dist/d3-delaunay.min.js';s.onload=function(){window.__d3ready&&window.__d3ready()};document.head.appendChild(s);})()"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=Space+Mono:wght@400;700&display=swap">
@@ -203,7 +203,10 @@ nav.main button.on{color:var(--ink);background:var(--surface-2);box-shadow:inset
 .rc h4{font-size:16px;font-weight:700}
 .rc p{font-size:13.5px;color:var(--muted);margin:0}
 .thumb{aspect-ratio:16/9;border-radius:10px;background:var(--surface-2);border:1px solid var(--line);display:grid;place-items:center;color:var(--muted)}
-.footer{margin-top:60px;border-top:1px solid var(--line);padding-top:20px;color:var(--muted);font-size:12.5px;display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between}
+.footer{margin-top:60px;border-top:1px solid var(--line);padding-top:20px;color:var(--muted);font-size:12.5px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between}
+.footer .credit{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.org-logo{display:inline-flex;align-items:center;background:#fff;border:1px solid var(--line);border-radius:8px;padding:3px 6px;flex:none}
+.org-logo img{height:40px;width:auto;display:block}
 .gi{display:inline-block;vertical-align:middle}
 </style>
 
@@ -356,7 +359,10 @@ nav.main button.on{color:var(--ink);background:var(--surface-2);box-shadow:inset
   </section>
 
   <div class="footer">
-    <span>Prototipo de propuesta · Territorios Audiovisuales · Radio JGM — Escuela de Periodismo U. de Chile</span>
+    <div class="credit">
+      <span class="org-logo"><img src="logo_colores.png" alt="Radio JGM — Escuela de Periodismo, Universidad de Chile"></span>
+      <span>Prototipo de propuesta · Territorios Audiovisuales · Radio JGM — Escuela de Periodismo U. de Chile</span>
+    </div>
     <span class="mono">contenido de ejemplo · no es data real</span>
   </div>
 </div>
@@ -371,36 +377,49 @@ const CAPAS = {
   rec:{n:"Recuerdos", v:"--c-rec"}
 };
 function capaColor(k){return getComputedStyle(document.documentElement).getPropertyValue('--c-'+k).trim();}
+function embedIcon(embed){
+  if(embed==='Spotify') return `<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M6 15.2c4-1.4 8-1.4 12 .2"/><path d="M5 11.6c5-1.9 9-1.9 14 .1"/><path d="M4.2 7.9c6-2.3 9.6-2.3 15.6.1"/></svg>`;
+  return '▶';
+}
 
-// comunas de muestra (subset RM) — nombre + semilla aproximada (x,y en 0..1) para el mapa generado
-const COMUNAS = [
-  ["Quinta Normal",.34,.44],["Santiago",.5,.52],["Independencia",.5,.32],["Recoleta",.62,.28],
-  ["Renca",.34,.24],["Cerro Navia",.2,.36],["Lo Prado",.24,.5],["Estación Central",.4,.6],
-  ["Providencia",.66,.46],["Ñuñoa",.7,.6],["Maipú",.22,.72],["Pedro Aguirre Cerda",.46,.72],
-  ["San Miguel",.56,.72],["Macul",.74,.72],["La Florida",.8,.84],["Conchalí",.5,.16]
-];
+// comunas de muestra (subset RM) — límites reales, simplificados y normalizados a 0..1
+// fuente: caracena/chile-geojson (región 13, Metropolitana de Santiago), generalizado con mapshaper
+const COMUNAS_GEO = [["San Miguel",[[0.5276,0.6934],[0.5963,0.741],[0.5851,0.5379],[0.5587,0.5369]]],["Independencia",[[0.5524,0.1599],[0.5526,0.1599],[0.5043,0.1788],[0.526,0.2906],[0.5256,0.293],[0.5461,0.3095],[0.5654,0.3202],[0.5658,0.3207],[0.5656,0.3158],[0.567,0.2779],[0.5689,0.2502]]],["Providencia",[[0.7068,0.3285],[0.6412,0.2089],[0.605,0.2692],[0.5987,0.3377],[0.5987,0.3387],[0.5987,0.3401],[0.6038,0.3848],[0.6067,0.4062],[0.6325,0.3941],[0.6333,0.3994],[0.6528,0.3863],[0.6723,0.3814],[0.6853,0.3965]]],["Santiago",[[0.5851,0.5379],[0.6197,0.5024],[0.6069,0.4077],[0.6067,0.4062],[0.6038,0.3848],[0.5987,0.3401],[0.5987,0.3387],[0.5782,0.3275],[0.5658,0.3207],[0.5654,0.3202],[0.5461,0.3095],[0.5256,0.293],[0.5254,0.2949],[0.4846,0.3678],[0.4842,0.3805],[0.5089,0.3776],[0.5079,0.5078],[0.5244,0.536],[0.5065,0.536],[0.5063,0.5457],[0.525,0.5457],[0.5587,0.5369]]],["Cerro Navia",[[0.4238,0.3421],[0.4352,0.2376],[0.4218,0.2211],[0.4216,0.2216],[0.4212,0.2221],[0.3773,0.2245],[0.362,0.2235],[0.3003,0.2308],[0.3137,0.2833],[0.3909,0.3411]]],["Conchalí",[[0.5526,0.1599],[0.5528,0.1574],[0.5553,0.05],[0.4669,0],[0.4811,0.0763],[0.5043,0.1788]]],["Estación Central",[[0.4842,0.3805],[0.4839,0.3814],[0.4549,0.4014],[0.4531,0.4014],[0.4549,0.4189],[0.4561,0.4422],[0.4092,0.4334],[0.3988,0.5024],[0.4216,0.5204],[0.4433,0.5661],[0.4965,0.5437],[0.5057,0.5457],[0.5063,0.5457],[0.5065,0.536],[0.5244,0.536],[0.5079,0.5078],[0.5089,0.3776]]],["La Florida",[[0.6428,0.691],[0.6477,0.9932],[0.694,0.9903],[0.7572,0.9456],[0.7351,0.8819],[0.7781,0.9028],[0.822,0.861],[0.8992,0.861],[1,0.6122],[0.8755,0.6395],[0.7891,0.7109],[0.691,0.6997]]],["Lo Prado",[[0.3909,0.3411],[0.3885,0.4237],[0.4092,0.4334],[0.4561,0.4422],[0.4549,0.4189],[0.4531,0.4014],[0.4531,0.3494],[0.4238,0.3421]]],["Macul",[[0.691,0.6997],[0.7178,0.5053],[0.6239,0.5282],[0.6428,0.691]]],["Maipú",[[0.3988,0.5024],[0.3135,0.447],[0.1816,0.4893],[0.1638,0.5525],[0.0776,0.5432],[0.0177,0.5933],[0,0.6783],[0.1583,0.8333],[0.2265,0.8353],[0.2538,0.7964],[0.2318,0.8625],[0.3306,1],[0.4299,0.7187],[0.386,0.6992],[0.4216,0.5204]]],["Ñuñoa",[[0.6067,0.4062],[0.6069,0.4077],[0.6197,0.5024],[0.6239,0.5282],[0.7178,0.5053],[0.73,0.4242],[0.7068,0.3285],[0.6853,0.3965],[0.6723,0.3814],[0.6528,0.3863],[0.6333,0.3994],[0.6325,0.3941]]],["Pedro Aguirre Cerda",[[0.5587,0.5369],[0.525,0.5457],[0.5063,0.5457],[0.5057,0.5457],[0.4965,0.5437],[0.4768,0.6618],[0.5276,0.6934]]],["Quinta Normal",[[0.5256,0.293],[0.5201,0.2886],[0.5128,0.2799],[0.4947,0.2629],[0.4856,0.2517],[0.4594,0.2031],[0.4305,0.2128],[0.4214,0.2196],[0.4216,0.2216],[0.4218,0.2211],[0.4352,0.2376],[0.4238,0.3421],[0.4531,0.3494],[0.4531,0.4014],[0.4549,0.4014],[0.4839,0.3814],[0.4842,0.3805],[0.4846,0.3678],[0.5254,0.2949]]],["Recoleta",[[0.5658,0.3207],[0.5782,0.3275],[0.5987,0.3387],[0.5987,0.3377],[0.605,0.2692],[0.6412,0.2089],[0.6341,0.1603],[0.5553,0.05],[0.5528,0.1574],[0.5526,0.1599],[0.5524,0.1599],[0.5689,0.2502],[0.567,0.2779],[0.5656,0.3158]]],["Renca",[[0.5256,0.293],[0.526,0.2906],[0.5043,0.1788],[0.4811,0.0763],[0.3921,0.1317],[0.3525,0.0855],[0.3003,0.2308],[0.362,0.2235],[0.3773,0.2245],[0.4212,0.2221],[0.4216,0.2216],[0.4214,0.2196],[0.4305,0.2128],[0.4594,0.2031],[0.4856,0.2517],[0.4947,0.2629],[0.5128,0.2799],[0.5201,0.2886]]]];
+const COMUNA_NAMES = COMUNAS_GEO.map(c=>c[0]).sort((a,b)=>a.localeCompare(b,'es'));
+function polyCentroid(poly){
+  let a=0,cx=0,cy=0;
+  for(let i=0;i<poly.length;i++){
+    const [x0,y0]=poly[i], [x1,y1]=poly[(i+1)%poly.length];
+    const cross=x0*y1-x1*y0; a+=cross; cx+=(x0+x1)*cross; cy+=(y0+y1)*cross;
+  }
+  a*=0.5;
+  if(Math.abs(a)<1e-9){ const n=poly.length; return [poly.reduce((s,p)=>s+p[0],0)/n, poly.reduce((s,p)=>s+p[1],0)/n]; }
+  return [cx/(6*a), cy/(6*a)];
+}
+const COMUNA_CENTER = {};
+COMUNAS_GEO.forEach(([name,poly])=>{ const [x,y]=polyCentroid(poly); COMUNA_CENTER[name]={x,y}; });
 
 const RELATOS = [
   {id:1, t:"Fundación de Radio Placeres comunitaria", capa:"ini", year:1992, comuna:"Quinta Normal",
-   x:.35,y:.45, ix:.30,iy:.42, embed:"SoundCloud", rel:[4],
+   x:.45,y:.31, ix:.30,iy:.42, embed:"SoundCloud", rel:[4],
    txt:"Un grupo de vecinas y vecinos levanta una radio de baja potencia para cubrir las juntas de vecinos y la vida del barrio. La antena, instalada en una azotea de la calle Mapocho, alcanzaba diez cuadras a la redonda."},
   {id:2, t:"Cine-club del sindicato", capa:"rec", year:1971, comuna:"Santiago",
-   x:.5,y:.53, ix:.55,iy:.66, embed:"YouTube", rel:[],
+   x:.56,y:.40, ix:.55,iy:.66, embed:"YouTube", rel:[],
    txt:"Todos los viernes se proyectaba cine en el galpón del sindicato. Sábanas por telón y una Bell & Howell prestada. La memoria de esas funciones sobrevive en los relatos de quienes hoy peinan canas."},
   {id:3, t:"Doña Ester, locutora popular", capa:"tra", year:1985, comuna:"Independencia",
-   x:.5,y:.33, ix:.68,iy:.30, embed:"Spotify", rel:[1],
+   x:.56,y:.22, ix:.68,iy:.30, embed:"Spotify", rel:[1],
    txt:"Su voz cruzó tres décadas de radio comunitaria. Empezó leyendo avisos fúnebres y terminó dirigiendo el noticiero barrial más escuchado del sector norte."},
   {id:4, t:"Red de prensa poblacional", capa:"ini", year:1987, comuna:"Renca",
-   x:.34,y:.25, ix:.20,iy:.24, embed:"Documento", rel:[1,3],
+   x:.40,y:.15, ix:.20,iy:.24, embed:"Documento", rel:[1,3],
    txt:"Cientos de boletines mimeografiados circulando de mano en mano durante la dictadura. Un tejido de talleres que sostuvo la palabra propia cuando los medios grandes callaban."},
   {id:5, t:"El cine llegaba en camión", capa:"rec", year:1968, comuna:"Maipú",
-   x:.23,y:.72, ix:.40,iy:.72, embed:"YouTube", rel:[],
+   x:.22,y:.66, ix:.40,iy:.72, embed:"YouTube", rel:[],
    txt:"Antes de las salas fijas, una unidad móvil recorría los fundos y poblaciones con un proyector. La llegada del camión era fiesta: se acomodaban sillas y cajones en la cancha."},
   {id:6, t:"Nicanor, radiocontrolador de barrio", capa:"tra", year:2004, comuna:"Ñuñoa",
-   x:.7,y:.6, ix:.82,iy:.5, embed:"Spotify", rel:[],
+   x:.70,y:.43, ix:.82,iy:.5, embed:"Spotify", rel:[],
    txt:"De la radioafición a la organización vecinal. Coordinó las primeras transmisiones en vivo de las fiestas costumbristas del sector oriente."},
   {id:7, t:"Estudio abierto en la plaza", capa:"ini", year:2024, comuna:"Estación Central",
-   x:.4,y:.6, ix:.50,iy:.55, embed:"YouTube", rel:[6],
+   x:.48,y:.50, ix:.50,iy:.55, embed:"YouTube", rel:[6],
    txt:"Hoy la radio vuelve al espacio público: un estudio desmontable que se instala en ferias y plazas para grabar a quien quiera contar su historia."}
 ];
 
@@ -430,20 +449,14 @@ document.getElementById('themeBtn').addEventListener('click',()=>{
 });
 
 /* ============================================================
-   MAPA generado (Voronoi de comunas) — reutilizable
+   MAPA — comunas con límites reales (proyectadas a la vista)
    ============================================================ */
 function buildComunaCells(w,h,pad){
-  const pts = COMUNAS.map(c=>[pad + c[1]*(w-2*pad), pad + c[2]*(h-2*pad)]);
-  let cells=[];
-  if(window.d3 && d3.Delaunay){
-    const del = d3.Delaunay.from(pts);
-    const vor = del.voronoi([2,2,w-2,h-2]);
-    cells = COMUNAS.map((c,i)=>({name:c[0], poly:vor.cellPolygon(i), cx:pts[i][0], cy:pts[i][1]}));
-  }else{
-    // fallback: rounded blobs
-    cells = COMUNAS.map((c,i)=>({name:c[0], poly:null, cx:pts[i][0], cy:pts[i][1]}));
-  }
-  return cells;
+  return COMUNAS_GEO.map(([name,poly])=>{
+    const screenPoly = poly.map(([x,y])=>[pad + x*(w-2*pad), pad + y*(h-2*pad)]);
+    const center = COMUNA_CENTER[name];
+    return {name, poly:screenPoly, cx:pad + center.x*(w-2*pad), cy:pad + center.y*(h-2*pad)};
+  });
 }
 function polyPath(poly){ if(!poly) return ''; return 'M'+poly.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join('L')+'Z'; }
 
@@ -498,7 +511,7 @@ function renderDetail(){
     <h3>${r.t}</h3>
     <div class="meta"><span class="coords">${r.comuna} · ${r.year}</span></div>
     <p class="txt">${r.txt}</p>
-    <div class="embed"><div class="play">▶</div><div><b>${r.embed==='Documento'?'Documento adjunto':'Reproducir · '+r.embed}</b><span>${r.embed==='Documento'?'PDF enlazado':'contenido embebido'}</span></div></div>
+    <div class="embed"><div class="play">${embedIcon(r.embed)}</div><div><b>${r.embed==='Documento'?'Documento adjunto':'Reproducir · '+r.embed}</b><span>${r.embed==='Documento'?'PDF enlazado':'contenido embebido'}</span></div></div>
     ${rels.length?`<div class="related"><div class="lbl">Trenzado con</div>${rels.map(x=>`<button data-jump="${x.id}"><span class="b" style="background:${capaColor(x.capa)}"></span>${x.t}</button>`).join('')}</div>`:''}
   `;
   d.querySelectorAll('[data-jump]').forEach(b=>b.addEventListener('click',()=>{selectedId=+b.dataset.jump;renderExplore();}));
@@ -518,8 +531,7 @@ function svgMap(w,h,rel,sel,withLegend){
   cells.forEach(c=>{
     const n=counts[c.name]||0; const t=n/maxc;
     const fill = n? shade(domCapa[c.name], t) : getComputedStyle(root).getPropertyValue('--surface-2').trim();
-    if(c.poly) s+=`<path class="comuna" d="${polyPath(c.poly)}" fill="${fill}"/>`;
-    else s+=`<circle class="comuna" cx="${c.cx}" cy="${c.cy}" r="34" fill="${fill}"/>`;
+    s+=`<path class="comuna" d="${polyPath(c.poly)}" fill="${fill}"/>`;
     s+=`<text class="comuna-label" x="${c.cx}" y="${c.cy}" text-anchor="middle" dy="3">${c.name}</text>`;
   });
   // puntos
@@ -530,7 +542,7 @@ function svgMap(w,h,rel,sel,withLegend){
   });
   s+=`</svg>`;
   const legend = withLegend? `<div class="legend"><div class="row"><span class="sw" style="background:var(--c-ini)"></span>Iniciativas</div><div class="row"><span class="sw" style="background:var(--c-tra)"></span>Trayectorias</div><div class="row"><span class="sw" style="background:var(--c-rec)"></span>Recuerdos</div><div class="row" style="margin-top:2px"><span class="grad"></span>+ relatos</div></div>`:'';
-  return s+legend+`<div class="vp-note">choropleth por comuna · en producción: GeoJSON RM + Leaflet</div>`;
+  return s+legend+`<div class="vp-note">choropleth · límites reales de comunas (RM) · en producción: Leaflet + basemap</div>`;
 }
 
 /* ---------- SVG: LÍNEA DE TIEMPO ---------- */
@@ -598,7 +610,7 @@ let draft = { capa:"ini", placeX:null, placeY:null, points:[] };
 let editorFormat="mapa";
 
 // llenar select de comunas
-(function(){const sel=document.getElementById('f-comuna');COMUNAS.forEach(c=>{const o=document.createElement('option');o.value=c[0];o.textContent=c[0];sel.appendChild(o);});})();
+(function(){const sel=document.getElementById('f-comuna');COMUNA_NAMES.forEach(name=>{const o=document.createElement('option');o.value=name;o.textContent=name;sel.appendChild(o);});})();
 
 document.getElementById('f-capa').addEventListener('click',e=>{
   const b=e.target.closest('button'); if(!b)return; draft.capa=b.dataset.c;
@@ -617,9 +629,9 @@ document.getElementById('addPoint').addEventListener('click',()=>{
   const comuna=document.getElementById('f-comuna').value;
   const txt=document.getElementById('f-text').value.trim()||"(sin relato aún)";
   const embed=document.getElementById('f-embed').value.trim()?"Multimedia":"—";
-  const cData=COMUNAS.find(c=>c[0]===comuna);
-  const px = draft.placeX!=null?draft.placeX:(cData?cData[1]:.5);
-  const py = draft.placeY!=null?draft.placeY:(cData?cData[2]:.5);
+  const cCenter=COMUNA_CENTER[comuna];
+  const px = draft.placeX!=null?draft.placeX:(cCenter?cCenter.x:.5);
+  const py = draft.placeY!=null?draft.placeY:(cCenter?cCenter.y:.5);
   draft.points.push({id:Date.now(), t:title, capa:draft.capa, year, comuna, txt, embed, x:px,y:py, ix:px, iy:py, rel:[]});
   draft.placeX=draft.placeY=null;
   document.getElementById('f-title').value=''; document.getElementById('f-text').value=''; document.getElementById('f-embed').value='';
@@ -692,8 +704,6 @@ function stub(){
 
 /* init */
 stub(); renderPList();
-window.__d3ready=function(){ try{ drawHero(); if(document.getElementById('s-explorar').classList.contains('on')) renderExplore(); if(document.getElementById('s-playground').classList.contains('on')) renderEditor(); }catch(e){} };
-if(!window.d3){ let tries=0; const iv=setInterval(()=>{ if(window.d3||tries++>25){clearInterval(iv); if(window.d3) window.__d3ready();} },150); }
 window.addEventListener('load',()=>{drawHero();});
 window.addEventListener('resize',()=>{ if(document.getElementById('s-intro').classList.contains('on'))drawHero(); if(document.getElementById('s-explorar').classList.contains('on'))renderExplore(); if(document.getElementById('s-playground').classList.contains('on'))renderEditor(); });
 setTimeout(drawHero,200);
