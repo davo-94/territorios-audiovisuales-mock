@@ -1,0 +1,8 @@
+{
+  "name": "territorios-audiovisuales-mock",
+  "private": true,
+  "description": "Prototipo navegable de Territorios Audiovisuales (Radio JGM).",
+  "scripts": {
+    "test": "node --test tests/*.test.js"
+  }
+}
