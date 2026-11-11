@@ -1,0 +1,79 @@
+{
+  "id": 42,
+  "slug": "ejemplo",
+  "titulo": "Portafolio de ejemplo",
+  "anio": "2026",
+  "resumen": "Datos de muestra para validar el contrato v2. No representan un territorio real.",
+  "presentacion": "<p>Contexto del territorio: ubicación, historia breve y por qué se eligió para el mapeo.</p>",
+  "informe": "<h2>Informe del grupo</h2><p>Texto completo del informe entregado por el grupo, con sus hallazgos y metodología.</p>",
+  "secciones": ["territorio", "mapa", "linea", "multimedia", "texto"],
+  "vista_mapa": null,
+  "imagen_base": null,
+  "portada": null,
+  "autores": [
+    { "slug": "autora-ejemplo", "nombre": "Autora Ejemplo" },
+    { "slug": "autor-ejemplo", "nombre": "Autor Ejemplo" }
+  ],
+  "creditos": "Curso de ejemplo, Escuela de Periodismo, Universidad de Chile.",
+  "recursos": [
+    {
+      "id": 300,
+      "titulo": "Informe original",
+      "descripcion": "Versión entregada por el grupo.",
+      "url": "https://example.org/informe",
+      "portafolio": 42
+    }
+  ],
+  "relatos": [
+    {
+      "id": 101,
+      "portafolio": 42,
+      "titulo": "Fundación de una radio comunitaria",
+      "texto": "<p>Un grupo de vecinas y vecinos levanta una radio de baja potencia para cubrir la vida del barrio.</p>",
+      "extracto": "Un grupo de vecinas y vecinos levanta una radio de baja potencia…",
+      "capa": "iniciativas",
+      "fecha": { "inicio": "1992", "fin": null },
+      "mapa": { "lat": -33.4400, "lng": -70.6950 },
+      "imagen": null,
+      "embed": {
+        "tipo": "youtube",
+        "url": "https://www.youtube.com/watch?v=_KS2o-W1KqI",
+        "src": "https://www.youtube-nocookie.com/embed/_KS2o-W1KqI"
+      },
+      "relaciones": [102, 210],
+      "autores": [{ "slug": "autora-ejemplo", "nombre": "Autora Ejemplo" }]
+    },
+    {
+      "id": 102,
+      "portafolio": 42,
+      "titulo": "Testimonio: la radio en dictadura",
+      "texto": "<p>Una locutora recuerda los años en que la radio sostuvo la palabra propia del barrio.</p>",
+      "extracto": "Una locutora recuerda los años en que la radio sostuvo la palabra propia…",
+      "capa": "trayectorias-de-vida",
+      "fecha": { "inicio": "1973-09", "fin": "1990-03" },
+      "mapa": { "lat": -33.4420, "lng": -70.6900 },
+      "imagen": null,
+      "embed": {
+        "tipo": "spotify",
+        "url": "https://open.spotify.com/episode/3iBgOQkOSvz792H939qWur",
+        "src": "https://open.spotify.com/embed/episode/3iBgOQkOSvz792H939qWur"
+      },
+      "relaciones": [101],
+      "autores": [{ "slug": "autor-ejemplo", "nombre": "Autor Ejemplo" }]
+    },
+    {
+      "id": 103,
+      "portafolio": 42,
+      "titulo": "El cine llegaba en camión",
+      "texto": "<p>Una unidad móvil recorría las poblaciones con un proyector; la cancha se llenaba de sillas y cajones.</p>",
+      "extracto": "Una unidad móvil recorría las poblaciones con un proyector…",
+      "capa": "recuerdos",
+      "fecha": { "inicio": "1968", "fin": null },
+      "mapa": null,
+      "imagen": null,
+      "embed": null,
+      "relaciones": [],
+      "autores": [{ "slug": "autora-ejemplo", "nombre": "Autora Ejemplo" }]
+    }
+  ]
+}
